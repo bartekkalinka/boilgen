@@ -24,7 +24,7 @@ object Main extends App {
         case q"..$mods class $tname[..$tparams] ..$ctorMods (...$paramss) extends $template" =>
           val classDefns = paramss.flatten.map { param =>
             val caseClassName = Type.Name(tname + ucFirst(param.name.syntax))
-            val typeName = param.decltpe.map(d => d.syntax).getOrElse("String").parse[Type.Arg].get
+            val typeName = param.decltpe.get
             q"case class $caseClassName(value: $typeName) extends AnyVal"
           }
           val newSource = source"..$classDefns"
