@@ -17,10 +17,12 @@ object Main extends App {
 
   def ucFirst(str: String): String = Character.toUpperCase(str.charAt(0)) + str.substring(1)
 
-  def anyValClassForField(mainClassName: Type.Name, field: Term.Param): Defn.Class = {
+  case class ClassDefnWithName(name: Type.Name, defn: Defn.Class)
+
+  def anyValClassForField(mainClassName: Type.Name, field: Term.Param): ClassDefnWithName = {
     val caseClassName = Type.Name(mainClassName + ucFirst(field.name.syntax))
     val typeName = field.decltpe.get
-    q"case class $caseClassName(value: $typeName) extends AnyVal"
+    ClassDefnWithName(caseClassName, q"case class $caseClassName(value: $typeName) extends AnyVal")
   }
 
   val tree = input.parse[Source].get
@@ -28,8 +30,8 @@ object Main extends App {
     case source"..$stats" =>
       stats.head match {
         case q"..$mods class $tname[..$tparams] ..$ctorMods (...$paramss) extends $template" =>
-          val classDefns = paramss.flatten.map(anyValClassForField(tname, _))
-          val newSource = source"..$classDefns"
+          val anyValClassDefns = paramss.flatten.map(anyValClassForField(tname, _))
+          val newSource = source"..${anyValClassDefns.map(_.defn)}"
           println(newSource.syntax)
         case _ =>
           println("not a class")
