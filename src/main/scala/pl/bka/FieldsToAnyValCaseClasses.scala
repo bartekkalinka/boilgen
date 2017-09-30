@@ -14,15 +14,19 @@ object FieldsToAnyValCaseClasses {
           case q"..$mods class $tname[..$tparams] ..$ctorMods (...$paramss) extends $template" =>
             val anyValClassDefns = paramss.flatten.map(anyValClassForField(tname, _))
             val anyValClassesSource = source"..${anyValClassDefns.map(_.defn)}"
-            val replacedTypesFields = anyValClassDefns.map { case ClassDefnWithName(className, _, fieldName) =>
-              Term.Param(List.empty[Mod], fieldName, Some(className), None)
-            }
-            val replacedTypesClassSource = source"case class $tname(...${List(replacedTypesFields)})"
-            Right(AnyValCaseClassesOutput(anyValClassesSource.syntax, replacedTypesClassSource.syntax))
+            Right(AnyValCaseClassesOutput(anyValClassesSource.syntax, generateReplacedTypesClass(tname, anyValClassDefns.toList)))
           case _ =>
             Left("not a class")
         }
     }
+  }
+
+  private def generateReplacedTypesClass(tname: Type.Name, anyValClassDefns: List[ClassDefnWithName]): String = {
+    val replacedTypesFields = anyValClassDefns.map { case ClassDefnWithName(className, _, fieldName) =>
+      Term.Param(List.empty[Mod], fieldName, Some(className), None)
+    }
+    val replacedTypesClassSource = source"case class $tname(...${List(replacedTypesFields)})"
+    replacedTypesClassSource.syntax
   }
 
   private def ucFirst(str: String): String = Character.toUpperCase(str.charAt(0)) + str.substring(1)
