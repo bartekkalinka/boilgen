@@ -12,20 +12,25 @@ object FieldsToAnyValCaseClasses {
       case source"..$stats" =>
         stats.head match {
           case q"..$mods class $tname[..$tparams] ..$ctorMods (...$paramss) extends $template" =>
-            val anyValClassDefns = paramss.flatten.map(anyValClassForField(tname, _))
-            val anyValClassesSource = source"..${anyValClassDefns.map(_.defn)}"
-            Right(AnyValCaseClassesOutput(anyValClassesSource.syntax, generateReplacedTypesClass(tname, anyValClassDefns.toList)))
+            val (anyValClassDefns, anyValClassesSource) = generateAnyValClassDefns(tname, paramss)
+            Right(AnyValCaseClassesOutput(anyValClassesSource, generateReplacedTypesClass(tname, anyValClassDefns.toList)))
           case _ =>
             Left("not a class")
         }
     }
   }
 
-  private def generateReplacedTypesClass(tname: Type.Name, anyValClassDefns: List[ClassDefnWithName]): String = {
+  private def generateAnyValClassDefns(tname: Type.Name, paramss: Seq[Seq[Term.Param]]): (Seq[ClassDefnWithName], String) = {
+    val anyValClassDefns = paramss.flatten.map(anyValClassForField(tname, _))
+    val anyValClassesSource = source"..${anyValClassDefns.map(_.defn).toList}"
+    (anyValClassDefns, anyValClassesSource.syntax)
+  }
+
+  private def generateReplacedTypesClass(tname: Type.Name, anyValClassDefns: Seq[ClassDefnWithName]): String = {
     val replacedTypesFields = anyValClassDefns.map { case ClassDefnWithName(className, _, fieldName) =>
       Term.Param(List.empty[Mod], fieldName, Some(className), None)
     }
-    val replacedTypesClassSource = source"case class $tname(...${List(replacedTypesFields)})"
+    val replacedTypesClassSource = source"case class $tname(...${List(replacedTypesFields.toList)})"
     replacedTypesClassSource.syntax
   }
 
