@@ -1,5 +1,7 @@
 package pl.bka
 
+import pl.bka.FieldsToAnyValCaseClasses.AnyValCaseClassesOutput
+
 object Main extends App {
   val input =
     """
@@ -14,7 +16,9 @@ object Main extends App {
     """.stripMargin
 
   FieldsToAnyValCaseClasses.generate(input) match {
-    case Right(output) => println(output)
+    case Right(AnyValCaseClassesOutput(anyValClasses, replacedTypesClass)) =>
+      println(anyValClasses)
+      println(replacedTypesClass)
     case Left(error) => println(s"error $error")
   }
 }
