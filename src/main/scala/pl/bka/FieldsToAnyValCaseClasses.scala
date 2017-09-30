@@ -31,7 +31,27 @@ object FieldsToAnyValCaseClasses {
       Term.Param(List.empty[Mod], fieldName, Some(className), None)
     }
     val replacedTypesClassSource = source"case class $tname(...${List(replacedTypesFields.toList)})"
-    replacedTypesClassSource.syntax
+    reformatOutputClass(replacedTypesClassSource.syntax)
+  }
+
+  def reformatOutputClass(classSource: String): String = {
+    val tokens = classSource.tokenize.get
+    val builder = new StringBuilder()
+    tokens.foreach { token =>
+      if(token.is[Token.LeftParen]) {
+        builder.append(token.syntax)
+        builder.append("\n  ")
+      } else if(token.is[Token.Comma]) {
+        builder.append(token.syntax)
+        builder.append("\n ")
+      } else if(token.is[Token.RightParen]) {
+        builder.append("\n")
+        builder.append(token.syntax)
+      } else {
+        builder.append(token.syntax)
+      }
+    }
+    builder.mkString
   }
 
   private def ucFirst(str: String): String = Character.toUpperCase(str.charAt(0)) + str.substring(1)
