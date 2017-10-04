@@ -54,12 +54,10 @@ object FieldsToAnyValCaseClasses {
     builder.mkString
   }
 
-  private def ucFirst(str: String): String = Character.toUpperCase(str.charAt(0)) + str.substring(1)
-
   private case class ClassDefnWithName(name: Type.Name, defn: Defn.Class, originalFieldName: Term.Param.Name)
 
   private def anyValClassForField(mainClassName: Type.Name, field: Term.Param): ClassDefnWithName = {
-    val caseClassName = Type.Name(mainClassName + ucFirst(field.name.syntax))
+    val caseClassName = Type.Name(mainClassName + TextUtils.ucFirst(field.name.syntax))
     val typeName = field.decltpe.getOrElse(Type.Name("String"))
     val anyValClass = q"case class $caseClassName(value: $typeName) extends AnyVal"
     ClassDefnWithName(caseClassName, anyValClass, field.name)

@@ -6,7 +6,7 @@ import pl.bka.FieldsToSlickTable.SlickTableOutput
 object Main extends App {
   val input =
     """
-      |case class Transaction(
+      |case class BankTransaction(
       |  id: UUID,
       |  value: Long,
       |  createDate: Instant,
