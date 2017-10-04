@@ -6,7 +6,7 @@ object FieldsToAnyValCaseClasses {
 
   case class FieldWithAnyVal(fieldName: String, anyValType: String)
 
-  case class AnyValCaseClassesOutput(anyValClasses: String, replacedTypesClass: String, fields: Seq[FieldWithAnyVal])
+  case class AnyValCaseClassesOutput(anyValClasses: String, replacedTypesClass: String, mainClassName: String, fields: Seq[FieldWithAnyVal])
 
   def generate(input: String): Either[String, AnyValCaseClassesOutput] = {
     val tree = input.parse[Source].get
@@ -15,7 +15,9 @@ object FieldsToAnyValCaseClasses {
         stats.head match {
           case q"..$mods class $tname[..$tparams] ..$ctorMods (...$paramss) extends $template" =>
             val (anyValClassDefns, anyValClassesSource, fields) = generateAnyValClassDefns(tname, paramss)
-            Right(AnyValCaseClassesOutput(anyValClassesSource, generateReplacedTypesClass(tname, anyValClassDefns.toList), fields))
+            Right(AnyValCaseClassesOutput(
+              anyValClassesSource, generateReplacedTypesClass(tname, anyValClassDefns.toList), tname.syntax, fields
+            ))
           case _ =>
             Left("not a class")
         }

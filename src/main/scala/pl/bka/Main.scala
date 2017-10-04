@@ -17,14 +17,11 @@ object Main extends App {
     """.stripMargin
 
   FieldsToAnyValCaseClasses.generate(input) match {
-    case Right(AnyValCaseClassesOutput(anyValClasses, replacedTypesClass, fields)) =>
+    case Right(AnyValCaseClassesOutput(anyValClasses, replacedTypesClass, mainClassName, fields)) =>
       //println(anyValClasses)
       //println(replacedTypesClass)
-      FieldsToSlickTable.generate(input,fields) match {
-        case Right(SlickTableOutput(slickTable)) =>
-          println(slickTable)
-        case Left(error) => println(s"error $error")
-      }
+      val SlickTableOutput(slickTable) = FieldsToSlickTable.generate(mainClassName, fields)
+      println(slickTable)
     case Left(error) => println(s"error $error")
   }
 }
