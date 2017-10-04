@@ -1,11 +1,13 @@
 package pl.bka
 
+import pl.bka.FieldsToAnyValCaseClasses.FieldWithAnyVal
+
 import scala.meta._
 
 object FieldsToSlickTable {
   case class SlickTableOutput(slickTable: String)
 
-  def generate(input: String): Either[String, SlickTableOutput] = {
+  def generate(input: String, fields: Seq[FieldWithAnyVal]): Either[String, SlickTableOutput] = {
     val tree = input.parse[Source].get
     tree match {
       case source"..$stats" =>

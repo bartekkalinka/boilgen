@@ -16,16 +16,15 @@ object Main extends App {
       |)
     """.stripMargin
 
-//  FieldsToAnyValCaseClasses.generate(input) match {
-//    case Right(AnyValCaseClassesOutput(anyValClasses, replacedTypesClass)) =>
-//      println(anyValClasses)
-//      println(replacedTypesClass)
-//    case Left(error) => println(s"error $error")
-//  }
-
-  FieldsToSlickTable.generate(input) match {
-    case Right(SlickTableOutput(slickTable)) =>
-      println(slickTable)
+  FieldsToAnyValCaseClasses.generate(input) match {
+    case Right(AnyValCaseClassesOutput(anyValClasses, replacedTypesClass, fields)) =>
+      //println(anyValClasses)
+      //println(replacedTypesClass)
+      FieldsToSlickTable.generate(input,fields) match {
+        case Right(SlickTableOutput(slickTable)) =>
+          println(slickTable)
+        case Left(error) => println(s"error $error")
+      }
     case Left(error) => println(s"error $error")
   }
 }
