@@ -16,9 +16,16 @@ object FieldsToSlickTable {
       source"""
               case class $tableClassName(tag: BaseTable.Tag) extends BaseTable[$typeName](...$initArgs) {
                 import profile.api._
+                ..${fields.map(dbField).toList}
               }
         """
     SlickTableOutput(outputSource.syntax)
+  }
+
+  private def dbField(field: FieldWithAnyVal): Defn.Def = {
+    val tpe = t"${Type.Name(field.anyValType)}"
+    val columnName = TextUtils.camelToUnderscores(field.fieldName)
+    q"def ${Term.Name(field.fieldName)}: Rep[$tpe] = column[$tpe](${Lit.String(columnName)})"
   }
 }
 
