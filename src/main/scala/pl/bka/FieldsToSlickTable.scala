@@ -14,7 +14,12 @@ object FieldsToSlickTable {
             val tableClassName = Type.Name(s"${tname}s")
             val dbTableName = TextUtils.camelToUnderscores(TextUtils.lcFirst(tableClassName.syntax))
             val initsArgs = List(List(q"tag", Lit.String(dbTableName)))
-            val outputSource = source"case class $tableClassName(tag: BaseTable.Tag) extends BaseTable[$tname](...$initsArgs)"
+            val outputSource =
+              source"""
+                      case class $tableClassName(tag: BaseTable.Tag) extends BaseTable[$tname](...$initsArgs) {
+                        import profile.api._
+                      }
+                """
             Right(SlickTableOutput(outputSource.syntax))
           case _ =>
             Left("not a class")
