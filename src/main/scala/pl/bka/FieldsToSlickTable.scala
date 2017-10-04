@@ -12,7 +12,8 @@ object FieldsToSlickTable {
         stats.head match {
           case q"..$mods class $tname[..$tparams] ..$ctorMods (...$paramss) extends $template" =>
             val tableClassName = Type.Name(s"${tname}s")
-            val initsArgs = List(List(q"tag", Lit.String(tableClassName.syntax)))
+            val dbTableName = TextUtils.camelToUnderscores(TextUtils.lcFirst(tableClassName.syntax))
+            val initsArgs = List(List(q"tag", Lit.String(dbTableName)))
             val outputSource = source"case class $tableClassName(tag: BaseTable.Tag) extends BaseTable[$tname](...$initsArgs)"
             Right(SlickTableOutput(outputSource.syntax))
           case _ =>
