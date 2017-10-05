@@ -1,10 +1,10 @@
 package pl.bka
 
-import pl.bka.FieldsToAnyValCaseClasses.FieldWithAnyVal
+import pl.bka.AnyValGen.FieldWithAnyVal
 
 import scala.meta._
 
-object FieldsToSlickTable {
+object SlickTableGen {
   case class SlickTableOutput(slickTable: String)
 
   def generate(mainClassName: String, fields: Seq[FieldWithAnyVal]): SlickTableOutput = {

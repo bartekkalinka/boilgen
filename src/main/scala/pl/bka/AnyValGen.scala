@@ -2,7 +2,7 @@ package pl.bka
 
 import scala.meta._
 
-object FieldsToAnyValCaseClasses {
+object AnyValGen {
 
   case class FieldWithAnyVal(fieldName: String, anyValType: String)
 

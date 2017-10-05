@@ -1,7 +1,7 @@
 package pl.bka
 
-import pl.bka.FieldsToAnyValCaseClasses.AnyValCaseClassesOutput
-import pl.bka.FieldsToSlickTable.SlickTableOutput
+import pl.bka.AnyValGen.AnyValCaseClassesOutput
+import pl.bka.SlickTableGen.SlickTableOutput
 
 object Main extends App {
   val input =
@@ -16,11 +16,11 @@ object Main extends App {
       |)
     """.stripMargin
 
-  FieldsToAnyValCaseClasses.generate(input) match {
+  AnyValGen.generate(input) match {
     case Right(AnyValCaseClassesOutput(anyValClasses, replacedTypesClass, mainClassName, fields)) =>
       //println(anyValClasses)
       //println(replacedTypesClass)
-      val SlickTableOutput(slickTable) = FieldsToSlickTable.generate(mainClassName, fields)
+      val SlickTableOutput(slickTable) = SlickTableGen.generate(mainClassName, fields)
       println(slickTable)
     case Left(error) => println(s"error $error")
   }
