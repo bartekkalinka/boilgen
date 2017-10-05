@@ -1,5 +1,6 @@
 package pl.bka.generators
 
+import pl.bka.matchers.ClassMatcher
 import pl.bka.utils.TextUtils
 
 import scala.meta._
@@ -10,24 +11,15 @@ object AnyValGen {
 
   case class AnyValCaseClassesOutput(anyValClasses: String, replacedTypesClass: String, mainClassName: String, fields: Seq[FieldWithAnyVal])
 
-  def generate(input: String): Either[String, AnyValCaseClassesOutput] = {
-    val tree = input.parse[Source].get
-    tree match {
-      case source"..$stats" =>
-        stats.head match {
-          case q"..$mods class $tname[..$tparams] ..$ctorMods (...$paramss) extends $template" =>
-            val (anyValClassDefns, anyValClassesSource, fields) = generateAnyValClassDefns(tname, paramss)
-            Right(AnyValCaseClassesOutput(
-              anyValClassesSource, generateReplacedTypesClass(tname, anyValClassDefns.toList), tname.syntax, fields
-            ))
-          case _ =>
-            Left("not a class")
-        }
-    }
+  def generate(matcher: ClassMatcher): AnyValCaseClassesOutput = {
+    val (anyValClassDefns, anyValClassesSource, fields) = generateAnyValClassDefns(matcher.tname, matcher.fields)
+    AnyValCaseClassesOutput(
+      anyValClassesSource, generateReplacedTypesClass(matcher.tname, anyValClassDefns.toList), matcher.tname.syntax, fields
+    )
   }
 
-  private def generateAnyValClassDefns(tname: Type.Name, paramss: Seq[Seq[Term.Param]]): (Seq[ClassDefnWithName], String, Seq[FieldWithAnyVal]) = {
-    val (anyValClassDefns, fields) = paramss.flatten.map(anyValClassForField(tname, _)).unzip
+  private def generateAnyValClassDefns(tname: Type.Name, inputFields: Seq[Term.Param]): (Seq[ClassDefnWithName], String, Seq[FieldWithAnyVal]) = {
+    val (anyValClassDefns, fields) = inputFields.map(anyValClassForField(tname, _)).unzip
     val anyValClassesSource = source"..${anyValClassDefns.map(_.defn).toList}"
     (anyValClassDefns, anyValClassesSource.syntax, fields)
   }
