@@ -1,7 +1,8 @@
 package pl.bka
 
-import pl.bka.AnyValGen.AnyValCaseClassesOutput
-import pl.bka.SlickTableGen.SlickTableOutput
+import pl.bka.generators.AnyValGen.AnyValCaseClassesOutput
+import pl.bka.generators.{AnyValGen, SlickTableGen}
+import pl.bka.generators.SlickTableGen.SlickTableOutput
 
 object Main extends App {
   val input =

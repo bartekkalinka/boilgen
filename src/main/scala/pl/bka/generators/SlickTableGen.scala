@@ -1,6 +1,7 @@
-package pl.bka
+package pl.bka.generators
 
-import pl.bka.AnyValGen.FieldWithAnyVal
+import pl.bka.generators.AnyValGen.FieldWithAnyVal
+import pl.bka.utils.TextUtils
 
 import scala.meta._
 

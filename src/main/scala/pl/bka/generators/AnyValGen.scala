@@ -1,4 +1,6 @@
-package pl.bka
+package pl.bka.generators
+
+import pl.bka.utils.TextUtils
 
 import scala.meta._
 

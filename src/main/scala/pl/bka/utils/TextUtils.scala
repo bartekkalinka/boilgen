@@ -1,4 +1,4 @@
-package pl.bka
+package pl.bka.utils
 
 object TextUtils {
   def ucFirst(str: String): String = Character.toUpperCase(str.charAt(0)) + str.substring(1)
