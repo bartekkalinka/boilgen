@@ -18,6 +18,7 @@ object SlickTableGen {
               case class $tableClassName(tag: BaseTable.Tag) extends BaseTable[$typeName](...$initArgs) {
                 import profile.api._
                 ..${fields.map(dbField).toList}
+                ${starDef(mainClassName, fields)}
               }
         """
     SlickTableOutput(outputSource.syntax)
@@ -27,6 +28,14 @@ object SlickTableGen {
     val tpe = t"${Type.Name(field.anyValType)}"
     val columnName = TextUtils.camelToUnderscores(field.fieldName)
     q"def ${Term.Name(field.fieldName)}: Rep[$tpe] = column[$tpe](${Lit.String(columnName)})"
+  }
+
+  private def starDef(mainClassName: String, fields: Seq[FieldWithAnyVal]): Defn.Def = {
+    val mainClassType = Type.Name(mainClassName)
+    val mainClassTerm = Term.Name(mainClassName)
+    val fieldTerms = fields.map(f => Term.Name(f.fieldName)).toList
+    val tuple = q"(..$fieldTerms)"
+    q"override def * : ProvenShape[$mainClassType] = $tuple <> (($mainClassTerm.apply _).tupled, $mainClassTerm.unapply)"
   }
 }
 
