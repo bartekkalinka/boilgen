@@ -6,16 +6,16 @@ case class ClassMatcher(tname: Type.Name, fields: Seq[Term.Param])
 
 object ClassMatcher {
   def parse(input: String): Either[String, ClassMatcher] = {
-    println(s"11111111111 $input")
     val tree = input.parse[Source].get
     tree match {
       case source"..$stats" =>
-        stats.head match {
+        stats.collect {
           case q"..$mods class $tname[..$tparams] ..$ctorMods (...$paramss) extends $template" =>
-            Right(ClassMatcher(tname, paramss.flatten))
-          case _ =>
-            Left("not a class")
-        }
+            Some(ClassMatcher(tname, paramss.flatten))
+          case stat =>
+            println(s"11111111111111 ${stat.syntax}")
+            None
+        }.flatten.headOption.toRight("no class")
     }
   }
 }
