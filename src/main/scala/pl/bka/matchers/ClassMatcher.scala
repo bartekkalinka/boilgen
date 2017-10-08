@@ -6,8 +6,8 @@ case class ClassMatcher(tname: Type.Name, fields: Seq[Term.Param])
 
 object ClassMatcher {
   def parse(input: String): Either[String, ClassMatcher] = {
-    val tree = input.parse[Source].get
     println(s"11111111111 $input")
+    val tree = input.parse[Source].get
     tree match {
       case source"..$stats" =>
         stats.head match {
