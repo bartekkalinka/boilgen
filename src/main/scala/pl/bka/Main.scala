@@ -13,7 +13,7 @@ import scala.io.Source
 object Main {
   def main(args: Array[String]) {
     val inputOption = argsToInput(args)
-    val parsedInput = inputOption.toRight("wrong input options").flatMap(ClassMatcher.parse)
+    val parsedInput = inputOption.toRight("wrong input options").flatMap(ClassMatcher.parseClassWithPackageAndImports)
     parsedInput match {
       case Right(matcher) =>
         val AnyValCaseClassesOutput(anyValClasses, replacedTypesClass, mainClassName, fields) = AnyValGen.generate(matcher)
@@ -36,6 +36,9 @@ object Main {
 
   private val defaultInput =
     """
+      |package example
+      |import java.io.File
+      |
       |case class BankTransaction(
       |  id: UUID,
       |  value: Long,
