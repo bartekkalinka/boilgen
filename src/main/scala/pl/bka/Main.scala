@@ -41,7 +41,8 @@ object Main {
   private val defaultInput =
     """
       |package example
-      |import java.io.File
+      |import java.time.Instant
+      |import java.util.UUID
       |
       |case class BankTransaction(
       |  id: UUID,
