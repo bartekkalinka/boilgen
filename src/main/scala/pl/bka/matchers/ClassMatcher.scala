@@ -24,12 +24,8 @@ object ClassMatcher {
     val q"package $eref { ..$packageStats }" = stats.head
     packageStats.collect {
       case q"..$mods class $tname[..$tparams] ..$ctorMods (...$paramss) extends $template" =>
-        Some(ClassMatcher(tname, paramss.flatten))
-      case q"import ..$importersnel" =>
-        None
-      case _ =>
-        None
-    }.flatten.headOption.toRight("no class")
+        ClassMatcher(tname, paramss.flatten)
+    }.headOption.toRight("no class")
   }
 }
 
