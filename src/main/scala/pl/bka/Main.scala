@@ -31,26 +31,12 @@ object Main {
     }
   }
 
-  private def getInput(opts: InputOptions): String =
-    if(opts.inputPath == "") {
-      defaultInput
+  private def getInput(opts: InputOptions): String = {
+    val inputFile = if (opts.inputPath == "") {
+      Source.fromFile(new File("./src/main/scala/pl/bka/example/input/BankTransaction.scala"))
     } else {
-      Source.fromFile(new File(opts.inputPath)).getLines().toSeq.reduce(_ + "\n" + _)
+      Source.fromFile(new File(opts.inputPath))
     }
-
-  private val defaultInput =
-    """
-      |package example
-      |import java.time.Instant
-      |import java.util.UUID
-      |
-      |case class BankTransaction(
-      |  id: UUID,
-      |  value: Long,
-      |  createDate: Instant,
-      |  modifiedDate: Instant,
-      |  cardNumber: String,
-      |  description: String
-      |)
-    """.stripMargin
+    inputFile.getLines().toSeq.reduce(_ + "\n" + _)
+  }
 }
