@@ -12,14 +12,14 @@ object AnyValGen {
   case class AnyValCaseClassesOutput(anyValClasses: String, replacedTypesClass: String, mainClassName: String, fields: Seq[FieldWithAnyVal])
 
   def generate(matcher: ClassMatcher): AnyValCaseClassesOutput = {
-    val (anyValClassDefns, anyValClassesSource, fields) = generateAnyValClassDefns(matcher.tname, matcher.fields)
+    val (anyValClassDefns, anyValClassesSource, fields) = generateAnyValClassDefns(matcher)
     AnyValCaseClassesOutput(
       anyValClassesSource, generateReplacedTypesClass(matcher.tname, anyValClassDefns.toList), matcher.tname.syntax, fields
     )
   }
 
-  private def generateAnyValClassDefns(tname: Type.Name, inputFields: Seq[Term.Param]): (Seq[ClassDefnWithName], String, Seq[FieldWithAnyVal]) = {
-    val (anyValClassDefns, fields) = inputFields.map(anyValClassForField(tname, _)).unzip
+  private def generateAnyValClassDefns(matcher: ClassMatcher): (Seq[ClassDefnWithName], String, Seq[FieldWithAnyVal]) = {
+    val (anyValClassDefns, fields) = matcher.fields.map(anyValClassForField(matcher.tname, _)).unzip
     val anyValClassesSource = source"..${anyValClassDefns.map(_.defn).toList}"
     (anyValClassDefns, anyValClassesSource.syntax, fields)
   }
