@@ -1,6 +1,6 @@
 package pl.bka.generators
 
-import pl.bka.generators.AnyValGen.FieldWithAnyVal
+import pl.bka.syntax.Field
 import pl.bka.utils.TextUtils
 
 import scala.meta._
@@ -8,7 +8,7 @@ import scala.meta._
 object SlickTableGen {
   case class SlickTableOutput(slickTable: String)
 
-  def generate(mainClassName: String, fields: Seq[FieldWithAnyVal]): SlickTableOutput = {
+  def generate(mainClassName: String, fields: Seq[Field]): SlickTableOutput = {
     val typeName = Type.Name(mainClassName)
     val tableClassName = Type.Name(s"${typeName}s")
     val dbTableName = TextUtils.camelToUnderscores(TextUtils.lcFirst(tableClassName.syntax))
@@ -24,16 +24,16 @@ object SlickTableGen {
     SlickTableOutput(outputSource.syntax)
   }
 
-  private def dbField(field: FieldWithAnyVal): Defn.Def = {
-    val tpe = t"${Type.Name(field.anyValType)}"
-    val columnName = TextUtils.camelToUnderscores(field.fieldName)
-    q"def ${Term.Name(field.fieldName)}: Rep[$tpe] = column[$tpe](${Lit.String(columnName)})"
+  private def dbField(field: Field): Defn.Def = {
+    val tpe = t"${Type.Name(field.tpe)}"
+    val columnName = TextUtils.camelToUnderscores(field.name)
+    q"def ${Term.Name(field.name)}: Rep[$tpe] = column[$tpe](${Lit.String(columnName)})"
   }
 
-  private def starDef(mainClassName: String, fields: Seq[FieldWithAnyVal]): Defn.Def = {
+  private def starDef(mainClassName: String, fields: Seq[Field]): Defn.Def = {
     val mainClassType = Type.Name(mainClassName)
     val mainClassTerm = Term.Name(mainClassName)
-    val fieldTerms = fields.map(f => Term.Name(f.fieldName)).toList
+    val fieldTerms = fields.map(f => Term.Name(f.name)).toList
     val tuple = q"(..$fieldTerms)"
     q"override def * : ProvenShape[$mainClassType] = $tuple <> (($mainClassTerm.apply _).tupled, $mainClassTerm.unapply)"
   }
