@@ -12,22 +12,22 @@ object AnyValGen {
   case class AnyValCaseClassesOutput(anyValClasses: String, replacedTypesClass: String, mainClassName: String, fields: Seq[FieldWithAnyVal])
 
   def generate(matcher: ClassMatcher): AnyValCaseClassesOutput = {
-    val (anyValClassNames, anyValClassesSource, fields) = generateAnyValClassDefns(matcher)
-    val replacedTypesClassSource = generateReplacedTypesClass(matcher.tname, anyValClassNames.toList)
+    val (anyValClassesSource, fields) = generateAnyValClassDefns(matcher)
+    val replacedTypesClassSource = generateReplacedTypesClass(matcher.tname, fields)
     AnyValCaseClassesOutput(
       anyValClassesSource, replacedTypesClassSource, matcher.tname.syntax, fields
     )
   }
 
-  private def generateAnyValClassDefns(matcher: ClassMatcher): (Seq[ClassDefnName], String, Seq[FieldWithAnyVal]) = {
-    val (anyValClassDefns, anyValClassNames, fields) = matcher.fields.map(anyValClassForField(matcher.tname, _)).unzip3
+  private def generateAnyValClassDefns(matcher: ClassMatcher): (String, Seq[FieldWithAnyVal]) = {
+    val (anyValClassDefns, fields) = matcher.fields.map(anyValClassForField(matcher.tname, _)).unzip
     val anyValClassesSource = source"..${anyValClassDefns.toList}"
-    (anyValClassNames, anyValClassesSource.syntax, fields)
+    (anyValClassesSource.syntax, fields)
   }
 
-  private def generateReplacedTypesClass(tname: Type.Name, anyValClassNames: Seq[ClassDefnName]): String = {
-    val replacedTypesFields = anyValClassNames.map { case ClassDefnName(className, fieldName) =>
-      Term.Param(List.empty[Mod], fieldName, Some(className), None)
+  private def generateReplacedTypesClass(tname: Type.Name, fields: Seq[FieldWithAnyVal]): String = {
+    val replacedTypesFields = fields.map { case FieldWithAnyVal(fieldName, anyValType) =>
+      Term.Param(List.empty[Mod], q"fieldName", Some(Type.Name(anyValType)), None)
     }
     val replacedTypesClassSource = source"case class $tname(...${List(replacedTypesFields.toList)})"
     reformatOutputClass(replacedTypesClassSource.syntax)
@@ -53,15 +53,12 @@ object AnyValGen {
     builder.mkString
   }
 
-  private case class ClassDefnName(name: Type.Name, originalFieldName: Term.Param.Name)
-
-  private def anyValClassForField(mainClassName: Type.Name, field: Term.Param): (Defn.Class, ClassDefnName, FieldWithAnyVal) = {
+  private def anyValClassForField(mainClassName: Type.Name, field: Term.Param): (Defn.Class, FieldWithAnyVal) = {
     val caseClassName = Type.Name(mainClassName + TextUtils.ucFirst(field.name.syntax))
     val typeName = field.decltpe.getOrElse(Type.Name("String"))
     val anyValClass = q"case class $caseClassName(value: $typeName) extends AnyVal"
     (
       anyValClass,
-      ClassDefnName(caseClassName, field.name),
       FieldWithAnyVal(field.name.syntax, caseClassName.value)
     )
   }
