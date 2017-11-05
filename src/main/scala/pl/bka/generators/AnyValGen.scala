@@ -13,22 +13,23 @@ object AnyValGen {
 
   def generate(matcher: ClassMatcher): AnyValCaseClassesOutput = {
     val (anyValClassesSource, fields) = generateAnyValClassDefns(matcher)
-    val replacedTypesClassSource = generateReplacedTypesClass(matcher.tname, fields)
+    val replacedTypesClassSource = generateReplacedTypesClass(matcher.className, fields)
     AnyValCaseClassesOutput(
-      anyValClassesSource, replacedTypesClassSource, matcher.tname.syntax, fields
+      anyValClassesSource, replacedTypesClassSource, matcher.className, fields
     )
   }
 
   private def generateAnyValClassDefns(matcher: ClassMatcher): (String, Seq[FieldWithAnyVal]) = {
-    val (anyValClassDefns, fields) = matcher.fields.map(anyValClassForField(matcher.tname, _)).unzip
+    val (anyValClassDefns, fields) = matcher.fields.map(anyValClassForField(matcher.className, _)).unzip
     val anyValClassesSource = source"..${anyValClassDefns.toList}"
     (anyValClassesSource.syntax, fields)
   }
 
-  private def generateReplacedTypesClass(tname: Type.Name, fields: Seq[FieldWithAnyVal]): String = {
+  private def generateReplacedTypesClass(mainClassName: String, fields: Seq[FieldWithAnyVal]): String = {
     val replacedTypesFields = fields.map { case FieldWithAnyVal(fieldName, anyValType) =>
       Term.Param(List.empty[Mod], q"fieldName", Some(Type.Name(anyValType)), None)
     }
+    val tname = t"mainClassName"
     val replacedTypesClassSource = source"case class $tname(...${List(replacedTypesFields.toList)})"
     reformatOutputClass(replacedTypesClassSource.syntax)
   }
@@ -53,7 +54,7 @@ object AnyValGen {
     builder.mkString
   }
 
-  private def anyValClassForField(mainClassName: Type.Name, field: Term.Param): (Defn.Class, FieldWithAnyVal) = {
+  private def anyValClassForField(mainClassName: String, field: Term.Param): (Defn.Class, FieldWithAnyVal) = {
     val caseClassName = Type.Name(mainClassName + TextUtils.ucFirst(field.name.syntax))
     val typeName = field.decltpe.getOrElse(Type.Name("String"))
     val anyValClass = q"case class $caseClassName(value: $typeName) extends AnyVal"

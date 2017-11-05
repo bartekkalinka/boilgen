@@ -2,7 +2,7 @@ package pl.bka.matchers
 
 import scala.meta._
 
-case class ClassMatcher(tname: Type.Name, fields: Seq[Term.Param])
+case class ClassMatcher(className: String, fields: Seq[Term.Param])
 
 object ClassMatcher {
   def parseClassOnly(input: String): Either[String, ClassMatcher] = {
@@ -11,7 +11,7 @@ object ClassMatcher {
       case source"..$stats" =>
         stats.head match {
           case q"..$mods class $tname[..$tparams] ..$ctorMods (...$paramss) extends $template" =>
-            Right(ClassMatcher(tname, paramss.flatten))
+            Right(ClassMatcher(tname.syntax, paramss.flatten))
           case _ =>
             Left("not a class")
         }
@@ -24,7 +24,7 @@ object ClassMatcher {
     val q"package $eref { ..$packageStats }" = stats.head
     packageStats.collect {
       case q"..$mods class $tname[..$tparams] ..$ctorMods (...$paramss) extends $template" =>
-        ClassMatcher(tname, paramss.flatten)
+        ClassMatcher(tname.syntax, paramss.flatten)
     }.headOption.toRight("no class")
   }
 }
